@@ -9,7 +9,22 @@
  */
 
 export default {
-	async fetch(request, env, ctx) {
-		return new Response("Hello World!");
-	},
+    async fetch(request, env, ctx) {
+        return new Response(`
+            <html>
+                <head>
+    				<meta charset="UTF-8">
+    				<title>Room Status</title>
+				</head>
+                <body>
+                    <h1>Room Status</h1>
+                    <h2>😴 SLEEPING</h2>
+                </body>
+            </html>
+        `, {
+            headers: {
+                "Content-Type": "text/html"
+            }
+        });
+    },
 };
