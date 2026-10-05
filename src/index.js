@@ -10,15 +10,27 @@
 
 export default {
     async fetch(request, env, ctx) {
+        const status = "busy";
+
+        let message = "";
+
+        if (status === "sleeping") {
+            message = "😴 Sleeping<br>Please don't knock unless it's important.";
+        } else if (status === "busy") {
+            message = "🟠 Busy<br>Knock only if it's important.";
+        } else if (status === "awake") {
+            message = "🟢 Awake<br>You may knock!";
+        }
+
         return new Response(`
             <html>
                 <head>
-    				<meta charset="UTF-8">
-    				<title>Room Status</title>
-				</head>
+                    <meta charset="UTF-8">
+                    <title>Room Status</title>
+                </head>
                 <body>
                     <h1>Room Status</h1>
-                    <h2>😴 SLEEPING</h2>
+                    <h2>${message}</h2>
                 </body>
             </html>
         `, {
