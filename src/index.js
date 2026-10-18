@@ -21,8 +21,22 @@ export default {
 
                 if (formData.get("password")) {
                     const password = formData.get("password");
+                    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+                    const attemptsKey = `login-attempts:${ip}`;
+                    const attempts = Number(await env.ROOM_STATUS.get(attemptsKey) || "0");
+
+                    if (attempts >= 5) {
+                        return new Response("Too many failed attempts. Try again in 15 minutes.", {
+                        status: 429,
+                        headers: { "Content-Type": "text/plain" }
+                        });
+                    }
 
                     if (password !== env.ADMIN_PASSWORD) {
+                        const failedAttempts = Number(await env.ROOM_STATUS.get(attemptsKey) || "0");
+                        await env.ROOM_STATUS.put(attemptsKey, String(failedAttempts + 1), {
+                            expirationTtl: 900
+                        });
                         return new Response(`
                             <html>
                                 <head>
@@ -75,7 +89,7 @@ export default {
                             }
                         });
                     }
-
+                    await env.ROOM_STATUS.delete(attemptsKey);
                     const token = crypto.randomUUID();
 
                     await env.ROOM_STATUS.put(`session:${token}`, "authenticated", {
@@ -85,7 +99,7 @@ export default {
                     return new Response(null, {
                         status: 302,
                         headers: {
-                            "Set-Cookie": `session=${token}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=86400`,
+                            "Set-Cookie": `session=${token}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=86400${url.protocol === "https:" ? "; Secure" : ""}`,
                             "Location": "/admin"
                         }
                     });
@@ -93,6 +107,16 @@ export default {
 
                 if (!isLoggedIn) {
                     return new Response("Unauthorized", { status: 401 });
+                }
+                if (formData.get("logout")) {
+                    await env.ROOM_STATUS.delete(`session:${sessionToken}`);
+                    return new Response(null, {
+                        status: 302,
+                        headers: {
+                            "Set-Cookie": `session=; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=0${url.protocol === "https:" ? "; Secure" : ""}`,
+                            "Location": "/admin"
+                        }
+                    });
                 }
 
                 const newStatus = formData.get("status");
@@ -368,6 +392,9 @@ export default {
                                 <button class="awake" type="submit" name="status" value="awake">
                                     🟢 Awake
                                 </button>
+                            </form>
+                            <form method="POST">
+                                <button type="submit" name="logout" value="1">Log out</button>
                             </form>
 
                         </div>
