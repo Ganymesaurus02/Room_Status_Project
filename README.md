@@ -8,12 +8,18 @@ In a hostel, people often don't know whether it's a good time to knock on someon
 The idea was to create a small web app that could be accessed by scanning an NFC tag placed on my room door.
 
 ## Features
-- **Public status page:** Displays my current room status.
-- **Private admin panel:** Allows me to update the status using password-protected controls.
-- **Persistent status storage:** Uses Cloudflare KV to store the current status.
-- **Session-based login:** Uses a session cookie to keep the admin logged in.
-- **Mobile-friendly interface:** Designed to be easy to read on a phone.
-- **NFC integration:** A permanent link can be stored on an NFC tag, so visitors can check the status without needing a new link each time.
+**Room Status Display:** Shows whether the room occupant is Sleeping, Busy, or Awake.
+**Cloudflare Workers:** Hosts the website online.
+**Cloudflare KV Storage:** Stores the current room status and login sessions.
+**Password-Protected Admin Page:** Allows only authenticated users to change the room status.
+**Session-Based Authentication:** Maintains login sessions using unique session tokens.
+**Secure Session Cookies:** Uses HttpOnly, SameSite=Strict, and the Secure flag over HTTPS.
+**Logout Functionality:** Invalidates the active session and expires the session cookie.
+**Login Rate Limiting:** Tracks failed login attempts and temporarily blocks repeated attempts.
+**Responsive UI:** Provides a mobile-friendly interface for the public status page and admin panel.
+**NFC Compatibility:** Can be accessed through an NFC tag placed outside the hostel room.
+**Git and GitHub:** Tracks code changes and maintains an online project repository.
+**Deployment with Wrangler:** Deploys updates to Cloudflare Workers from the command line.
 
 ## Technologies Used
 - JavaScript
@@ -40,6 +46,4 @@ The application is deployed using Cloudflare Workers.
 Public status page: https://curly-wildflower-1b8d.roomstatus-mnit.workers.dev/status
 
 ## Future Improvements
-- Add logout functionality to the admin panel.
-- Improve session security and error handling.
 - Add a more convenient home-screen shortcut for the admin page.
